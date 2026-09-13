@@ -1,0 +1,24 @@
+<main>
+  <h1>Company Research Notes</h1>
+
+  <form (ngSubmit)="addNote()">
+    <input type="text" placeholder="Company name" [(ngModel)]="companyName" name="companyName" />
+    <textarea placeholder="Note" [(ngModel)]="note" name="note"></textarea>
+    <select [(ngModel)]="tag" name="tag">
+      <option value="research">Research</option>
+      <option value="networking">Networking</option>
+      <option value="interview">Interview</option>
+      <option value="follow-up">Follow-up</option>
+    </select>
+    <button type="submit">Add note</button>
+  </form>
+
+  <p *ngIf="error" class="error">{{ error }}</p>
+
+  <ul>
+    <li *ngFor="let n of notes">
+      <strong>{{ n.companyName }}</strong> ({{ n.tag }}): {{ n.note }}
+      <button (click)="deleteNote(n._id)">Delete</button>
+    </li>
+  </ul>
+</main>
