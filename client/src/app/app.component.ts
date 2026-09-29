@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CompanyNote, CompanyNoteService } from './company-note.service';
 
+const SEARCH_DEBOUNCE_MS = 250;
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -17,6 +19,11 @@ export class AppComponent implements OnInit {
   tag = 'research';
   error = '';
 
+  searchQuery = '';
+  tagFilter = '';
+  readonly filterTags = ['research', 'networking', 'interview', 'follow-up'];
+  private searchDebounceHandle?: ReturnType<typeof setTimeout>;
+
   constructor(private noteService: CompanyNoteService) {}
 
   ngOnInit(): void {
@@ -24,10 +31,17 @@ export class AppComponent implements OnInit {
   }
 
   loadNotes(): void {
-    this.noteService.list().subscribe({
-      next: (notes) => (this.notes = notes),
-      error: () => (this.error = 'Could not load notes from the server.'),
-    });
+    this.noteService
+      .list({ tag: this.tagFilter || undefined, q: this.searchQuery.trim() || undefined })
+      .subscribe({
+        next: (notes) => (this.notes = notes),
+        error: () => (this.error = 'Could not load notes from the server.'),
+      });
+  }
+
+  onSearchInput(): void {
+    clearTimeout(this.searchDebounceHandle);
+    this.searchDebounceHandle = setTimeout(() => this.loadNotes(), SEARCH_DEBOUNCE_MS);
   }
 
   addNote(): void {

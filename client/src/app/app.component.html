@@ -15,10 +15,29 @@
 
   <p *ngIf="error" class="error">{{ error }}</p>
 
+  <div class="filters">
+    <input
+      type="text"
+      placeholder="Search notes..."
+      [(ngModel)]="searchQuery"
+      name="searchQuery"
+      (ngModelChange)="onSearchInput()"
+    />
+    <select [(ngModel)]="tagFilter" name="tagFilter" (ngModelChange)="loadNotes()">
+      <option value="">All tags</option>
+      <option *ngFor="let t of filterTags" [value]="t">{{ t }}</option>
+    </select>
+  </div>
+
   <ul>
     <li *ngFor="let n of notes">
       <strong>{{ n.companyName }}</strong> ({{ n.tag }}): {{ n.note }}
       <button (click)="deleteNote(n._id)">Delete</button>
+      <div *ngIf="n.enrichment?.summary" class="enrichment">
+        <img *ngIf="n.enrichment?.thumbnailUrl" [src]="n.enrichment?.thumbnailUrl" alt="" />
+        <p>{{ n.enrichment?.summary }}</p>
+        <a *ngIf="n.enrichment?.url" [href]="n.enrichment?.url" target="_blank" rel="noopener">Wikipedia</a>
+      </div>
     </li>
   </ul>
 </main>

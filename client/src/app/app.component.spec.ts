@@ -63,4 +63,57 @@ describe('AppComponent', () => {
 
     expect(fixture.componentInstance.companyName).toBe('');
   });
+
+  it('reloads with a tag query param when the tag filter changes', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    httpMock.expectOne('http://localhost:4000/api/notes').flush([]);
+
+    fixture.componentInstance.tagFilter = 'interview';
+    fixture.componentInstance.loadNotes();
+
+    const req = httpMock.expectOne('http://localhost:4000/api/notes?tag=interview');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('reloads with a q query param after a search input change', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    httpMock.expectOne('http://localhost:4000/api/notes').flush([]);
+
+    fixture.componentInstance.searchQuery = 'hybrid';
+    fixture.componentInstance.loadNotes();
+
+    const req = httpMock.expectOne('http://localhost:4000/api/notes?q=hybrid');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('renders a note\'s enrichment summary and Wikipedia link when present', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne('http://localhost:4000/api/notes');
+    req.flush([
+      {
+        _id: '1',
+        companyName: 'Acme Corp',
+        note: 'Great culture fit',
+        tag: 'research',
+        enrichment: {
+          summary: 'Acme Corp is a fictional company.',
+          url: 'https://en.wikipedia.org/wiki/Acme_Corporation',
+          thumbnailUrl: null,
+          fetchedAt: new Date().toISOString(),
+        },
+      },
+    ]);
+    fixture.detectChanges();
+
+    const rendered = fixture.nativeElement as HTMLElement;
+    expect(rendered.textContent).toContain('Acme Corp is a fictional company.');
+    const link = rendered.querySelector('a[href="https://en.wikipedia.org/wiki/Acme_Corporation"]');
+    expect(link).not.toBeNull();
+  });
 });

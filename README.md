@@ -9,6 +9,18 @@ alongside Express (already used elsewhere in this author's work).
 Express REST API backed by a real MongoDB (via Mongoose): `GET/POST /api/notes`,
 `GET/DELETE /api/notes/:id`.
 
+- `GET /api/notes?tag=interview` filters to a real pipeline stage
+  (`research`/`networking`/`interview`/`follow-up`).
+- `GET /api/notes?q=hybrid` does a real full-text search (a MongoDB text
+  index on `companyName` + `note`) across both fields; combine with `?tag=`
+  to narrow both at once.
+- Every new note is enriched in the background (after the create response
+  has already gone out, so a slow lookup never delays saving) with a real
+  company summary from Wikipedia's public REST API -- no API key required.
+  A company with no matching article is just left without enrichment, not
+  an error. A second note about a company already looked up reuses the
+  cached summary instead of calling Wikipedia again.
+
 ```bash
 cd server
 npm install
