@@ -11,7 +11,16 @@ beforeAll(async () => {
   app = createApp();
 });
 
+beforeEach(() => {
+  // These tests aren't about enrichment -- stub fetch so a note's
+  // fire-and-forget background lookup fails fast instead of making a real
+  // Wikipedia call (and holding a real open socket) for every note created
+  // in this file.
+  jest.spyOn(global, "fetch").mockRejectedValue(new Error("network disabled in this test file"));
+});
+
 afterEach(async () => {
+  jest.restoreAllMocks();
   await mongoose.connection.db.dropDatabase();
 });
 
