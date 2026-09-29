@@ -9,6 +9,18 @@ function createApp() {
   app.use(express.json());
   app.use("/api/notes", notesRouter);
   app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+
+  // A real backstop, not just belt-and-suspenders: without this, an error
+  // that reaches here (any route handler that forwards to next(err),
+  // including via asyncHandler) would otherwise get Express's default
+  // HTML error page instead of the JSON error shape every other endpoint
+  // in this API returns.
+  // eslint-disable-next-line no-unused-vars
+  app.use((err, req, res, next) => {
+    console.error("Unhandled error:", err);
+    res.status(500).json({ error: "Something went wrong." });
+  });
+
   return app;
 }
 

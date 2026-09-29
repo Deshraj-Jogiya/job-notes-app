@@ -23,7 +23,11 @@ beforeEach(() => {
 
 afterEach(async () => {
   jest.restoreAllMocks();
-  await mongoose.connection.db.dropDatabase();
+  // Real bug found via CI: dropDatabase() drops the text index created
+  // once in beforeAll along with everything else, so every test after the
+  // first ran with no text index at all ("text index required for $text
+  // query"). deleteMany() clears the data but leaves indexes intact.
+  await CompanyNote.deleteMany({});
 });
 
 afterAll(async () => {
